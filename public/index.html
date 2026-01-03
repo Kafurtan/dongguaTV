@@ -308,21 +308,18 @@
                     lastTime = Date.now();
                     velocity = 0;
                     row.style.cursor = 'grabbing';
-                    row.style.scrollSnapType = 'none';
                     row.classList.add('grabbing');
                 });
                 
                 row.addEventListener('mouseleave', () => {
                     isDown = false;
                     row.style.cursor = 'grab';
-                    row.style.scrollSnapType = 'x mandatory';
                     row.classList.remove('grabbing');
                 });
                 
                 row.addEventListener('mouseup', () => {
                     isDown = false;
                     row.style.cursor = 'grab';
-                    row.style.scrollSnapType = 'x mandatory';
                     row.classList.remove('grabbing');
                     
                     // 添加惯性滚动
@@ -365,7 +362,6 @@
                     lastX = e.touches[0].pageX;
                     lastTime = Date.now();
                     velocity = 0;
-                    row.style.scrollSnapType = 'none';
                 });
                 
                 row.addEventListener('touchmove', (e) => {
@@ -401,7 +397,6 @@
                 row.addEventListener('touchend', () => {
                     if (!isDown) return;
                     isDown = false;
-                    row.style.scrollSnapType = 'x mandatory';
                     
                     if (!isScrolling && Math.abs(velocity) > 0.5) {
                         const inertiaScroll = () => {
@@ -418,8 +413,6 @@
                 
                 // 设置初始样式
                 row.style.cursor = 'grab';
-                row.style.scrollSnapType = 'x mandatory';
-                row.style.scrollPadding = '0 20px';
             });
         }
 
