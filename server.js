@@ -3,6 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,11 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin";
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
+
+// 根路径路由，指向 index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // 默认接口配置 (保持你的 30+ 个接口不变)
 const DEFAULT_SITES = [
