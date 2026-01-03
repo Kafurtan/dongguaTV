@@ -1,10 +1,10 @@
 {
   "name": "node-video-proxy",
   "version": "1.0.0",
-  "main": "server_fixed.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node server_fixed.js",
-    "dev": "node server_fixed.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
     "@sparticuz/chromium": "^143.0.4",

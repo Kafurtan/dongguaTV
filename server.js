@@ -1,12 +1,12 @@
+
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-// 文件系统模块已移除，因为Vercel不支持持久化文件存储
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "你想要的密码"; 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "你想要的密码";
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -15,36 +15,26 @@ app.use(express.static('public'));
 // 默认接口配置 (保持你的 30+ 个接口不变)
 const DEFAULT_SITES = [
     { key: "ffzy", name: "非凡影视", api: "https://替换接口 一行一条", active: true },
+    // 在这里添加更多接口...
+];
 
 // 使用内存存储替代文件存储，因为Vercel不支持持久化文件存储
 let db = { sites: DEFAULT_SITES };
 
-function getDB() { 
-    try {
-        const data = JSON.parse(fs.readFileSync(DATA_FILE));
-        // 简单的合并逻辑：确保代码里的30多个接口都在数据库里
-        if(FORCE_UPDATE) {
-            const dbSites = data.sites || [];
-            DEFAULT_SITES.forEach(defSite => {
-                if(!dbSites.find(s => s.key === defSite.key)) {
-                    dbSites.push(defSite);
-                }
-            });
-            return { sites: dbSites };
-        }
-        return data;
-    } catch(e) {
-        return { sites: DEFAULT_SITES };
-    }
+function getDB() {
+    return db;
 }
-function saveDB(data) { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2)); }
+
+function saveDB(data) {
+    db = data;
+}
 
 // === ★ 新增：真实测速接口 ★ ===
 app.get('/api/check', async (req, res) => {
     const { key } = req.query;
     const sites = getDB().sites;
     const site = sites.find(s => s.key === key);
-    
+
     if (!site) return res.json({ latency: 9999 });
 
     const start = Date.now();
@@ -76,9 +66,9 @@ app.get('/api/search', async (req, res) => {
     const { wd } = req.query;
     console.log(`[Search] ${wd}`);
     if (!wd) return res.json({ list: [] });
-    
+
     const sites = getDB().sites.filter(s => s.active);
-    
+
     const promises = sites.map(async (site) => {
         try {
             const response = await axios.get(`${site.api}?ac=list&wd=${encodeURIComponent(wd)}&out=json`, { timeout: 6000 });
@@ -86,17 +76,17 @@ app.get('/api/search', async (req, res) => {
             const list = data.list || data.data;
             if (list && Array.isArray(list)) {
                 return list.map(item => ({
-                    ...item, 
-                    site_key: site.key, 
+                    ...item,
+                    site_key: site.key,
                     site_name: site.name,
                     // 这里先不测速，给个默认值，点击详情再测
-                    latency: 0 
+                    latency: 0
                 }));
             }
         } catch (e) {}
         return [];
     });
-    
+
     const results = await Promise.all(promises);
     res.json({ list: results.flat() });
 });
