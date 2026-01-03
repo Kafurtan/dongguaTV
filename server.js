@@ -102,7 +102,13 @@ app.get('/api/detail', async (req, res) => {
     } catch (e) { res.status(500).json({ error: "Source Error" }); }
 });
 
-app.post('/api/admin/login', (req, res) => req.body.password === ADMIN_PASSWORD ? res.json({ success: true }) : res.status(403).json({ success: false }));
+app.post('/api/admin/login', (req, res) => {
+    if (req.body.password === ADMIN_PASSWORD) {
+        res.json({ success: true });
+    } else {
+        res.status(403).json({ success: false, msg: '密码错误' });
+    }
+});
 app.get('/api/admin/sites', (req, res) => res.json(getDB().sites));
 app.post('/api/admin/sites', (req, res) => { saveDB({sites: req.body.sites}); res.json({ success: true }); });
 
