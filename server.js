@@ -6,7 +6,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "你想要的密码";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin";
 
 app.use(cors());
 app.use(bodyParser.json());
