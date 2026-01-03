@@ -429,6 +429,39 @@
             },
             mounted() {
                 window.addEventListener('scroll', () => { this.scrollY = window.scrollY; });
+                
+                // 添加浏览器历史记录支持
+                history.replaceState({ action: 'home' }, '', window.location.pathname);
+                window.addEventListener('popstate', (event) => {
+                    if (event.state) {
+                        if (event.state.action === 'home') {
+                            this.showDetail = false;
+                            if (dp) dp.pause();
+                            this.searched = false;
+                            this.keyword = '';
+                            this.rawList = [];
+                        } else if (event.state.action === 'search') {
+                            this.showDetail = false;
+                            if (dp) dp.pause();
+                            this.keyword = event.state.keyword;
+                            this.doSearchInternal();
+                        } else if (event.state.action === 'detail') {
+                            if (this.searched) {
+                                const group = this.groupedList.find(g => g.name === event.state.groupName);
+                                if (group) {
+                                    this.openDetailInternal(group);
+                                }
+                            }
+                        }
+                    } else {
+                        this.showDetail = false;
+                        if (dp) dp.pause();
+                        this.searched = false;
+                        this.keyword = '';
+                        this.rawList = [];
+                    }
+                });
+                
                 this.fetchHero();
                 this.fetchAllLists();
                 
@@ -522,8 +555,20 @@
                         document.getElementById('search-result-anchor').scrollIntoView({ behavior: 'smooth' });
                     }, 100);
                 },
-                clearSearch() { this.searched = false; this.keyword = ''; this.rawList = []; },
+                clearSearch() {
+                    this.searched = false;
+                    this.keyword = '';
+                    this.rawList = [];
+                    // 添加历史记录 - 返回首页
+                    history.pushState({ action: 'home' }, '', '/');
+                },
                 async doSearch() {
+                    if (!this.keyword) return;
+                    await this.doSearchInternal();
+                    // 添加历史记录 - 搜索状态
+                    history.pushState({ action: 'search', keyword: this.keyword }, '', `?search=${encodeURIComponent(this.keyword)}`);
+                },
+                async doSearchInternal() {
                     if (!this.keyword) return;
                     this.loading = true;
                     this.searched = true;
@@ -539,6 +584,11 @@
                     this.loading = false;
                 },
                 openDetail(group) {
+                    this.openDetailInternal(group);
+                    // 添加历史记录 - 详情页状态
+                    history.pushState({ action: 'detail', groupName: group.name }, '', `?detail=${encodeURIComponent(group.name)}`);
+                },
+                openDetailInternal(group) {
                     this.currentGroup = group;
                     this.showDetail = true;
                     this.currentGroup.sources.forEach(source => {
@@ -550,7 +600,16 @@
                     let best = group.sources[0];
                     this.switchSource(best);
                 },
-                closeDetail() { this.showDetail = false; if (dp) dp.pause(); },
+                closeDetail() {
+                    this.showDetail = false;
+                    if (dp) dp.pause();
+                    // 添加历史记录 - 返回搜索结果或首页
+                    if (this.searched) {
+                        history.pushState({ action: 'search', keyword: this.keyword }, '', `?search=${encodeURIComponent(this.keyword)}`);
+                    } else {
+                        history.pushState({ action: 'home' }, '', '/');
+                    }
+                },
                 async switchSource(source) {
                     this.currentSource = source; this.loadingDetail = true; this.episodeList = [];
                     try {
