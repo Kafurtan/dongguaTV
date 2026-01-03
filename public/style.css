@@ -340,7 +340,6 @@ body {
     overflow-y: hidden;
     padding-bottom: 20px;
     scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -356,12 +355,10 @@ body {
 
 .hot-row:active {
     cursor: grabbing;
-    scroll-snap-type: none;
 }
 
 .hot-row.grabbing {
     cursor: grabbing;
-    scroll-snap-type: none;
 }
 
 .hot-card {
